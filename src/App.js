@@ -129,7 +129,7 @@ function App() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',
         height: '100vh', background: '#1a1a2e', flexDirection: 'column', gap: '20px' }}>
         <h1 style={{ color: 'white', fontSize: '2rem' }}>🎵 Walkman Simulator</h1>
-        <a href="http://127.0.0.1:5000/auth/login">
+        <a href="/auth/login">
           <button style={{ padding: '12px 32px', background: '#ff6b9d', color: 'white',
             border: 'none', borderRadius: '25px', fontSize: '1rem', cursor: 'pointer' }}>
             Login with Spotify
