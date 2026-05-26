@@ -7,7 +7,7 @@ const port = 5000
 
 var spotify_client_id = '6146757f2a9e4edaa561822bb54546f2'
 var spotify_client_secret = '1c170c46187044b981aada1003abf071'
-var redirect_uri = 'http://127.0.0.1:5000/auth/callback'
+var redirect_uri = process.env.REDIRECT_URI || 'http://127.0.0.1:5000/auth/callback'
 
 var app = express();
 app.use(cors());
@@ -58,7 +58,7 @@ app.get('/auth/callback', (req, res) => {
     }
   }).then(response => {
     var access_token = response.data.access_token;
-    res.redirect('http://localhost:3000/?access_token=' + access_token);
+    res.redirect((process.env.FRONTEND_URL || 'http://localhost:3000') + '/?access_token=' + access_token);
   }).catch(error => {
     res.send(error);
   });
