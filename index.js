@@ -45,7 +45,27 @@ app.get('/auth/callback', (req, res) => {
     }
   }).then(response => {
     var access_token = response.data.access_token;
-    res.redirect((process.env.FRONTEND_URL || 'http://localhost:3000') + '/?access_token=' + access_token);
+    var refresh_token = response.data.refresh_token;
+    res.redirect((process.env.FRONTEND_URL || 'http://localhost:3000') +
+      '/?access_token=' + access_token +
+      '&refresh_token=' + refresh_token);
+  }).catch(error => {
+    res.send(error);
+  });
+});
+
+app.get('/auth/refresh', (req, res) => {
+  const refresh_token = req.query.refresh_token;
+  axios.post('https://accounts.spotify.com/api/token', new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refresh_token
+  }), {
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic ' + Buffer.from(spotify_client_id + ':' + spotify_client_secret).toString('base64')
+    }
+  }).then(response => {
+    res.json({ access_token: response.data.access_token });
   }).catch(error => {
     res.send(error);
   });

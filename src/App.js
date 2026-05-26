@@ -4,6 +4,7 @@ import walkmanImage from './walkman_image.png';
 
 function App() {
   const [token, setToken] = useState(null);
+  const [refreshToken, setRefreshToken] = useState(sessionStorage.getItem('refresh_token'));
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [isPaused, setIsPaused] = useState(true);
@@ -20,15 +21,36 @@ function App() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const accessToken = params.get('access_token');
+    const refresh = params.get('refresh_token');
     if (accessToken) {
       sessionStorage.setItem('spotify_token', accessToken);
       setToken(accessToken);
+      if (refresh) {
+        sessionStorage.setItem('refresh_token', refresh);
+        setRefreshToken(refresh);
+      }
       window.history.replaceState({}, document.title, '/');
     } else {
       const saved = sessionStorage.getItem('spotify_token');
+      const savedRefresh = sessionStorage.getItem('refresh_token');
       if (saved) setToken(saved);
+      if (savedRefresh) setRefreshToken(savedRefresh);
     }
   }, []);
+
+  // Auto-refresh token every 50 minutes
+  useEffect(() => {
+    if (!refreshToken) return;
+    const interval = setInterval(async () => {
+      const res = await fetch(`/auth/refresh?refresh_token=${refreshToken}`);
+      const data = await res.json();
+      if (data.access_token) {
+        sessionStorage.setItem('spotify_token', data.access_token);
+        setToken(data.access_token);
+      }
+    }, 50 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [refreshToken]);
 
   useEffect(() => {
     if (!token) return;
@@ -109,8 +131,7 @@ function App() {
 
   const playTrack = async (uri) => {
     const trackIndex = playlistTracks.findIndex(t => t.uri === uri);
-    
-    // Disable shuffle first
+
     await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=false&device_id=${deviceId}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}` }
@@ -128,7 +149,9 @@ function App() {
 
   const logout = () => {
     sessionStorage.removeItem('spotify_token');
+    sessionStorage.removeItem('refresh_token');
     setToken(null);
+    setRefreshToken(null);
   };
 
   if (!token) {
