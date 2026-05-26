@@ -109,6 +109,13 @@ function App() {
 
   const playTrack = async (uri) => {
     const trackIndex = playlistTracks.findIndex(t => t.uri === uri);
+    
+    // Disable shuffle first
+    await fetch(`https://api.spotify.com/v1/me/player/shuffle?state=false&device_id=${deviceId}`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
