@@ -17,11 +17,12 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "cross-env HOST=0.0.0.0 react-scripts start",
-    "build": "react-scripts build",
-    "server": "cross-env HOST=127.0.0.1 node index.js",
-    "dev": "run-p server start"
-  },
+  "start": "node index.js",
+  "build": "react-scripts build",
+  "dev:client": "cross-env HOST=0.0.0.0 react-scripts start",
+  "dev:server": "cross-env HOST=127.0.0.1 node index.js",
+  "dev": "run-p dev:server dev:client"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
