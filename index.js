@@ -2,8 +2,7 @@ const express = require('express')
 const axios = require('axios');
 const cors = require('cors');
 const crypto = require('crypto');
-
-const port = 5000
+const path = require('path');
 
 var spotify_client_id = '6146757f2a9e4edaa561822bb54546f2'
 var spotify_client_secret = '1c170c46187044b981aada1003abf071'
@@ -11,14 +10,6 @@ var redirect_uri = process.env.REDIRECT_URI || 'http://127.0.0.1:5000/auth/callb
 
 var app = express();
 app.use(cors());
-const path = require('path');
-
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, 'build')));
-  app.get('/{*path}', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
-}
 
 var generateRandomString = (length) => {
   return crypto.randomBytes(60).toString('hex').slice(0, length);
@@ -29,9 +20,7 @@ var stateKey = 'spotify_auth_state';
 app.get('/auth/login', (req, res) => {
   var state = generateRandomString(16);
   res.cookie(stateKey, state);
-
   var scope = 'streaming user-read-email user-read-private playlist-read-private playlist-read-collaborative';
-
   var params = new URLSearchParams({
     response_type: 'code',
     client_id: spotify_client_id,
@@ -40,13 +29,11 @@ app.get('/auth/login', (req, res) => {
     state: state,
     show_dialog: 'true'
   });
-
   res.redirect('https://accounts.spotify.com/authorize?' + params.toString());
 });
 
 app.get('/auth/callback', (req, res) => {
   var code = req.query.code || null;
-
   axios.post('https://accounts.spotify.com/api/token', new URLSearchParams({
     code: code,
     redirect_uri: redirect_uri,
@@ -63,6 +50,14 @@ app.get('/auth/callback', (req, res) => {
     res.send(error);
   });
 });
+
+// Serve React app AFTER auth routes
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'build')));
+  app.get('/{*path}', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
