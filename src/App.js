@@ -326,9 +326,9 @@ function App() {
                 </div>
               </>
             ) : (
-              <div style={{ color: '#fff', fontSize: '0.55rem', fontFamily: 'monospace',
+              <div style={{ color: '#fff', fontSize: '0.75rem', fontFamily: 'monospace',
                 textAlign: 'center' }}>
-                SELECT A TRACK
+                Hi Drishya! <br /> Select a track to play
               </div>
             )}
           </div>
